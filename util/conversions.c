@@ -14,6 +14,11 @@ static char base64_table[64] = {
 	'4', '5', '6', '7', '8', '9', '+', '/'
 };
 
+static char hex_table[16] = {
+	'0', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+};
+
 char value_to_base64_char(uint8_t val) {
 	assert(val < 0x40);
 	return base64_table[val];
@@ -28,6 +33,11 @@ uint8_t hex_char_to_value(char c) {
 		assert(0);
 		return 0; // Unreachable
 	}
+}
+
+char value_to_hex_char(uint8_t val) {
+	assert(val < 0x10);
+	return hex_table[val];
 }
 
 string_t *hex_to_base64(string_t *s, bool output_as_text) {
@@ -79,5 +89,7 @@ string_t *hex_to_base64(string_t *s, bool output_as_text) {
 
 	if (output_as_text) out_str[output_length] = 0;
 	char string_flags = STRING_OWNS_S | (output_as_text ? STRING_IS_TEXT : 0);
-	return make_string(out_str, string_flags, output_length);
+	string_t *ret = make_string(out_str, string_flags, output_length);
+	if (!ret) free(out_str);
+	return ret;
 }
