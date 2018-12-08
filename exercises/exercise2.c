@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
 	char *input2 = argv[2];
 	printf("Hex input 2: %s\n", input2);
 	
-	string_t *in_str1 = make_string(input1, STRING_IS_TEXT, -1);
-	string_t *in_str2 = make_string(input2, STRING_IS_TEXT, -1);
-	string_t *xor_str = fixed_xor_hex_string(in_str1, in_str2, 1);
+	string_t *in_str1 = make_string(input1, 0);
+	string_t *in_str2 = make_string(input2, 0);
+	string_t *xor_str = fixed_xor_hex_string(in_str1, in_str2);
 
 	printf("Fixed XOR output: %s\n", xor_str->s);
 

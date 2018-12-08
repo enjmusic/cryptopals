@@ -40,7 +40,7 @@ char value_to_hex_char(uint8_t val) {
 	return hex_table[val];
 }
 
-string_t *hex_to_base64(string_t *s, bool output_as_text) {
+string_t *hex_to_base64(string_t *s) {
 	if (!s) return 0;
 
 	// Make sure output length is [smallest multiple of 4] >= s->l * 2/3
@@ -48,7 +48,7 @@ string_t *hex_to_base64(string_t *s, bool output_as_text) {
 	bool input_is_odd_length = (s->l & 0x1);
 	size_t output_length = ((input_is_odd_length ? s->l + 1 : s->l) * 2) / 3;
 	if (output_length & 0x3) output_length += 0x4 - (output_length & 0x3);
-	char *out_str = malloc(output_as_text ? output_length + 1 : output_length);
+	char *out_str = malloc(output_length + 1);
 	if (!out_str) return 0;
 
 	// Start conversion (padding beginning with a 0 if we have an odd-length hex string)
@@ -87,9 +87,50 @@ string_t *hex_to_base64(string_t *s, bool output_as_text) {
 	// Pad remainder of last 4 base64 chars with = character if needed
 	while (out_offset < output_length) out_str[out_offset++] = '=';
 
-	if (output_as_text) out_str[output_length] = 0;
-	char string_flags = STRING_OWNS_S | (output_as_text ? STRING_IS_TEXT : 0);
-	string_t *ret = make_string(out_str, string_flags, output_length);
+	out_str[output_length] = 0;
+	string_t *ret = make_string(out_str, STRING_OWNS_S);
+	if (!ret) free(out_str);
+	return ret;
+}
+
+string_t *hex_string_to_bytes(string_t *s) {
+	if (!s) return 0;
+	size_t output_length = s->l >> 1;
+	char *out_str = malloc(output_length + 1);
+	if (!out_str) return 0;
+
+	size_t in_offset = 0;
+	size_t out_offset = 0;
+	if (s->l & 0x1) {
+		out_str[out_offset++] = hex_char_to_value(s->s[in_offset]);
+		in_offset++;
+	}
+
+	while (in_offset < s->l) {
+		out_str[out_offset++] = (hex_char_to_value(s->s[in_offset]) << 4) | hex_char_to_value(s->s[in_offset + 1]);
+		in_offset += 2;
+	}
+
+	out_str[output_length] = 0;
+	string_t *ret = make_string(out_str, STRING_OWNS_S);
+	if (!ret) free(out_str);
+	return ret;
+}
+
+string_t *bytes_to_hex_string(string_t *s) {
+	if (!s) return 0;
+	size_t output_length = s->l << 1;
+	char *out_str = malloc(output_length + 1);
+	if (!out_str) return 0;
+
+	for (size_t i = 0; i < output_length; i += 2) {
+		uint8_t raw_byte = s->s[i >> 1];
+		out_str[i] = (raw_byte & 0xf0) >> 4;
+		out_str[i + 1] = raw_byte & 0x0f;
+	}
+
+	out_str[output_length] = 0;
+	string_t *ret = make_string(out_str, STRING_OWNS_S);
 	if (!ret) free(out_str);
 	return ret;
 }

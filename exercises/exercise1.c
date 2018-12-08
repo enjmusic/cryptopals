@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
 	char *input = argv[1];
 	printf("Hex input: %s\n", input);
 	
-	string_t *in_str = make_string(input, STRING_IS_TEXT, -1);
-	string_t *converted_str = hex_to_base64(in_str, 1);
+	string_t *in_str = make_string(input, 0);
+	string_t *converted_str = hex_to_base64(in_str);
 
 	printf("Base64 output: %s\n", converted_str->s);
 
